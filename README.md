@@ -39,6 +39,35 @@
 ```bash
 git clone https://github.com/rohandhobale/drivesync.git
 cd drivesync
+```
 
 ### 2. Install dependencies
+Frontend
+```
+cd project
+npm install
+```
+Backend
+```
+cd ../server
+npm install
+```
+### 3. Setup environment variables
+Create a .env file inside the server/ folder:
+```env
+PORT=5000
+MONGO_URI=your_mongodb_connection_url
+JWT_SECRET=your_jwt_secret
+```
+### 4. Run the application
+Start Backend
+```
+cd server
+npm start
+```
+Start Frontend
+``` 
+cd ../project
+npm run dev
+```
 
