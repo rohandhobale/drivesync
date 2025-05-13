@@ -1,64 +1,75 @@
 import mongoose from 'mongoose';
 
-const shipmentSchema = new mongoose.Schema({
-  businessId: {
+const locationSchema = new mongoose.Schema({
+  lat: {
+    type: Number,
+    required: true
+  },
+  lng: {
+    type: Number,
+    required: true
+  }
+});
+
+const requestSchema = new mongoose.Schema({
+  driverId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User',
     required: true
   },
+  status: {
+    type: String,
+    enum: ['pending', 'accepted', 'rejected'],
+    default: 'pending'
+  }
+}, { timestamps: true });
+
+const shipmentSchema = new mongoose.Schema({
   title: {
     type: String,
-    required: true
+    required: true,
   },
   fromCity: {
     type: String,
-    required: true
+    required: true,
   },
   toCity: {
     type: String,
-    required: true
+    required: true,
   },
-  status: {
-    type: String,
-    enum: ['pending', 'active', 'completed'],
-    default: 'pending'
-  },
+  description: String,
   deadline: {
     type: Date,
-    required: true
+    required: true,
   },
   weight: {
     type: Number,
-    required: true
+    required: true,
   },
   volume: {
     type: String,
-    required: true
+    required: true,
   },
-  cost: {
-    type: Number,
-    required: true
+  businessId: {
+    type: mongoose.Schema.Types.ObjectId,
+    ref: 'User',
+    required: true,
+    index: true
   },
-  description: String,
+  status: {
+    type: String,
+    enum: ['pending', 'active', 'picked_up', 'in_transit', 'delivered', 'cancelled'],
+    default: 'pending'
+  },
   driverId: {
     type: mongoose.Schema.Types.ObjectId,
     ref: 'User'
   },
-  requests: [{
-    driverId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
-    },
-    status: {
-      type: String,
-      enum: ['pending', 'accepted', 'rejected'],
-      default: 'pending'
-    },
-    createdAt: {
-      type: Date,
-      default: Date.now
-    }
-  }]
+  requests: [requestSchema],
+  pickupLocation: locationSchema,
+  dropoffLocation: locationSchema,
+  currentLocation: locationSchema,
+  lastLocationUpdate: Date
 }, {
   timestamps: true
 });

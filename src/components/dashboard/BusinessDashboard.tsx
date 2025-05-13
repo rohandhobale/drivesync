@@ -24,6 +24,7 @@ export default function BusinessDashboard() {
   const [activeSection, setActiveSection] = useState('overview');
   const [showNotifications, setShowNotifications] = useState(false);
   const [shipments, setShipments] = useState([]);
+  const [selectedShipment, setSelectedShipment] = useState(null);
   const [metrics, setMetrics] = useState({
     totalShipments: 0,
     activeShipments: 0,
@@ -58,6 +59,12 @@ export default function BusinessDashboard() {
     }
   };
 
+  const handleViewDetails = (shipment) => {
+    setSelectedShipment(shipment);
+    setActiveSection('manage');
+    setShowNotifications(false);
+  };
+
   const handleLogout = () => {
     logoutUser();
     navigate('/');
@@ -70,7 +77,11 @@ export default function BusinessDashboard() {
       case 'post':
         return <PostShipment onShipmentCreated={fetchShipments} />;
       case 'manage':
-        return <ManageShipments shipments={shipments} onUpdate={fetchShipments} />;
+        return <ManageShipments 
+          shipments={shipments} 
+          onUpdate={fetchShipments}
+          selectedShipment={selectedShipment}
+        />;
       default:
         return (
           <div>
@@ -157,7 +168,7 @@ export default function BusinessDashboard() {
                           {shipment.requests.length} driver requests
                         </span>
                         <button 
-                          onClick={() => setActiveSection('manage')}
+                          onClick={() => handleViewDetails(shipment)}
                           className="text-sm text-blue-600 hover:text-blue-700"
                         >
                           View Details
@@ -246,7 +257,10 @@ export default function BusinessDashboard() {
 
             <nav className="space-y-1">
               <button
-                onClick={() => setActiveSection('overview')}
+                onClick={() => {
+                  setActiveSection('overview');
+                  setSelectedShipment(null);
+                }}
                 className={`w-full flex items-center px-4 py-2 text-sm font-medium rounded-md ${
                   activeSection === 'overview' 
                     ? 'bg-blue-50 text-blue-600' 
@@ -258,7 +272,10 @@ export default function BusinessDashboard() {
               </button>
 
               <button
-                onClick={() => setActiveSection('profile')}
+                onClick={() => {
+                  setActiveSection('profile');
+                  setSelectedShipment(null);
+                }}
                 className={`w-full flex items-center px-4 py-2 text-sm font-medium rounded-md ${
                   activeSection === 'profile' 
                     ? 'bg-blue-50 text-blue-600' 
@@ -270,7 +287,10 @@ export default function BusinessDashboard() {
               </button>
 
               <button
-                onClick={() => setActiveSection('post')}
+                onClick={() => {
+                  setActiveSection('post');
+                  setSelectedShipment(null);
+                }}
                 className={`w-full flex items-center px-4 py-2 text-sm font-medium rounded-md ${
                   activeSection === 'post' 
                     ? 'bg-blue-50 text-blue-600' 
@@ -282,7 +302,10 @@ export default function BusinessDashboard() {
               </button>
 
               <button
-                onClick={() => setActiveSection('manage')}
+                onClick={() => {
+                  setActiveSection('manage');
+                  setSelectedShipment(null);
+                }}
                 className={`w-full flex items-center px-4 py-2 text-sm font-medium rounded-md ${
                   activeSection === 'manage' 
                     ? 'bg-blue-50 text-blue-600' 
@@ -294,7 +317,10 @@ export default function BusinessDashboard() {
               </button>
 
               <button
-                onClick={() => setActiveSection('settings')}
+                onClick={() => {
+                  setActiveSection('settings');
+                  setSelectedShipment(null);
+                }}
                 className={`w-full flex items-center px-4 py-2 text-sm font-medium rounded-md ${
                   activeSection === 'settings' 
                     ? 'bg-blue-50 text-blue-600' 
@@ -330,7 +356,7 @@ export default function BusinessDashboard() {
                         New driver request for shipment {shipment.title}
                       </p>
                       <button
-                        onClick={() => setActiveSection('manage')}
+                        onClick={() => handleViewDetails(shipment)}
                         className="text-xs text-blue-600 hover:text-blue-700"
                       >
                         View Details

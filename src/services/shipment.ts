@@ -49,9 +49,37 @@ export const handleDriverRequest = async (
   }
 };
 
-export const updateShipmentStatus = async (shipmentId: string, status: string) => {
+export const updateShipmentStatus = async (shipmentId: string, status: string, location?: { lat: number; lng: number }) => {
   try {
-    const response = await api.patch(`/shipments/${shipmentId}/status`, { status });
+    const response = await api.patch(`/shipments/${shipmentId}/status`, { status, location });
+    return response.data;
+  } catch (error: any) {
+    throw error.response?.data || error.message;
+  }
+};
+
+export const updateShipmentLocations = async (
+  shipmentId: string,
+  pickupLocation?: { lat: number; lng: number },
+  dropoffLocation?: { lat: number; lng: number }
+) => {
+  try {
+    const response = await api.patch(`/shipments/${shipmentId}/locations`, {
+      pickupLocation,
+      dropoffLocation
+    });
+    return response.data;
+  } catch (error: any) {
+    throw error.response?.data || error.message;
+  }
+};
+
+export const updateCurrentLocation = async (
+  shipmentId: string,
+  location: { lat: number; lng: number }
+) => {
+  try {
+    const response = await api.patch(`/shipments/${shipmentId}/current-location`, { location });
     return response.data;
   } catch (error: any) {
     throw error.response?.data || error.message;

@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { toast } from 'react-toastify';
 import { getDriverShipments } from '../../services/driver';
+import { updateCurrentLocation, updateShipmentStatus } from '../../services/shipment';
+import ShipmentMap from '../tracking/ShipmentMap';
 
 type ShipmentType = {
   _id: string;
@@ -10,9 +12,12 @@ type ShipmentType = {
   status: string;
   deadline: string;
   weight: number;
-  cost:number;
+  cost: number;
   volume: string;
   description: string;
+  pickupLocation?: { lat: number; lng: number };
+  dropoffLocation?: { lat: number; lng: number };
+  currentLocation?: { lat: number; lng: number };
   businessId: {
     businessName: string;
     contactNumber: string;
@@ -22,6 +27,7 @@ type ShipmentType = {
 export default function DriverShipments() {
   const [shipments, setShipments] = useState<ShipmentType[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedShipment, setSelectedShipment] = useState<ShipmentType | null>(null);
 
   useEffect(() => {
     loadShipments();
@@ -35,6 +41,24 @@ export default function DriverShipments() {
       toast.error('Failed to load shipments');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleLocationUpdate = async (shipmentId: string, location: { lat: number; lng: number }) => {
+    try {
+      await updateCurrentLocation(shipmentId, location);
+    } catch (error) {
+      console.error('Failed to update location:', error);
+    }
+  };
+
+  const handleStatusUpdate = async (shipmentId: string, status: string) => {
+    try {
+      await updateShipmentStatus(shipmentId, status);
+      toast.success('Status updated successfully');
+      loadShipments();
+    } catch (error) {
+      toast.error('Failed to update status');
     }
   };
 
@@ -84,16 +108,43 @@ export default function DriverShipments() {
                     </p>
                   </div>
                 </div>
-                <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                  shipment.status === 'active' 
-                    ? 'bg-green-100 text-green-800'
-                    : shipment.status === 'completed'
-                    ? 'bg-purple-100 text-purple-800'
-                    : 'bg-gray-100 text-gray-800'
-                }`}>
-                  {shipment.status.toUpperCase()}
-                </span>
+
+                <div className="flex flex-col items-end space-y-2">
+                  <span className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                    shipment.status === 'active' 
+                      ? 'bg-green-100 text-green-800'
+                      : shipment.status === 'delivered'
+                      ? 'bg-purple-100 text-purple-800'
+                      : 'bg-gray-100 text-gray-800'
+                  }`}>
+                    {shipment.status.toUpperCase()}
+                  </span>
+
+                  {shipment.status === 'active' && (
+                    <select
+                      onChange={(e) => handleStatusUpdate(shipment._id, e.target.value)}
+                      className="mt-2 rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    >
+                      <option value="">Update Status</option>
+                      <option value="picked_up">Mark as Picked Up</option>
+                      <option value="in_transit">Mark as In Transit</option>
+                      <option value="delivered">Mark as Delivered</option>
+                    </select>
+                  )}
+                </div>
               </div>
+
+              {/* Map Section */}
+              {shipment.pickupLocation && shipment.dropoffLocation && (
+                <div className="mt-4">
+                  <h4 className="text-sm font-medium text-gray-900 mb-2">Shipment Route</h4>
+                  <ShipmentMap
+                    shipment={shipment}
+                    isDriver={true}
+                    onLocationUpdate={(location) => handleLocationUpdate(shipment._id, location)}
+                  />
+                </div>
+              )}
             </div>
           ))}
         </div>
